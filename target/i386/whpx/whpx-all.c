@@ -2356,14 +2356,25 @@ static void whpx_update_mapping(hwaddr start_pa, ram_addr_t size,
 }
 
 static void whpx_process_section(MemoryRegionSection *section, int add)
+section->offset_within_region + delta;
 {
     MemoryRegion *mr = section->mr;
     hwaddr start_pa = section->offset_within_address_space;
     ram_addr_t size = int128_get64(section->size);
+    int rom;
     unsigned int delta;
     uint64_t host_va;
 
-    if (!memory_region_is_ram(mr)) {
+   if (memory_region_is_ram(mr)) {
+       rom = memory_region_is_rom(mr);
+    } else if (memory_region_is_romd(mr)) {
+        if (!strcmp(memory_region_name(mr), "system.flash0")) {
+            rom = true;
+        } else {
+            return;
+        }
+    } else {
+
         return;
     }
 
@@ -2383,7 +2394,7 @@ static void whpx_process_section(MemoryRegionSection *section, int add)
             + section->offset_within_region + delta;
 
     whpx_update_mapping(start_pa, size, (void *)(uintptr_t)host_va, add,
-                        memory_region_is_rom(mr), mr->name);
+                        rom, memory_region_name(mr));
 }
 
 static void whpx_region_add(MemoryListener *listener,
