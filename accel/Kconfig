@@ -1,0 +1,24 @@
+config WHPX
+    bool
+
+config NVMM
+    bool
+
+config HAX
+    bool
+
+config HVF
+    bool
+
+config TCG
+    bool
+
+config KVM
+    bool
+
+config AEHD
+    bool
+
+config XEN
+    bool
+    select FSDEV_9P if VIRTFS
